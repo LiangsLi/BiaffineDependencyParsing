@@ -159,6 +159,7 @@ def train(configs) -> None:
     with Timer('Train'):
         trainer.train(train_data_loader, dev_data_loader, dev_conllu)
     logger.info('Train Complete!')
+    logger.info(f'Best Model Parameters and Configs saved in {configs.output_model_dir}')
 
     if configs.test_after_train and configs.local_rank in [-1, 0]:
         if configs.no_output:

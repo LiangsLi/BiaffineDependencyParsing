@@ -29,23 +29,32 @@ BERT+Transformer+Biaffine dependency parser
 >`test_file`: 'test/sdp_news_test.conllu'
 
 同时根据数据集的相关信息合理设置`per_gpu_train_batch_size`、`max_seq_len`等参数
-
+## Install
+```shell script
+git clone https://github.com/NLPInBLCU/BiaffineDependencyParsing
+git submodule init
+git submodule update --remote
+```
+或者
+```shell script
+git clone https://github.com/NLPInBLCU/BiaffineDependencyParsing assets --recursive
+```
 ## 使用
 
 ### 训练Train
 查看帮助信息：`python main.py train -h`
 
 ```shell
-CUDA_VISIBLE_DEVICES=0,1,2,3 python main.py train -c config_files/bert_biaffine.yaml
+CUDA_VISIBLE_DEVICES=0,1,2,3 python main.py train -c config_files/bert_biaffine.yaml --test_after_train
 ```
 ### torch.distributed 分布式训练
 
 [distributedDataParallel VS dataParallel](parallelTrain.md)
 
-> 当GPU卡数较多或数据量较大（或者max_seq_len较大时），推荐使用`torch.distributed`训练
+> 当GPU卡数较多或数据量较大（或者`max_seq_len`较大时），推荐使用`torch.distributed`训练
 
 ```shell script
-CUDA_VISIBLE_DEVICES=0,1,2,3,5,6 python -m torch.distributed.launch --nproc_per_node=6 main.py -c config_files/bert_biaffine.yaml
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5 python -m torch.distributed.launch --nproc_per_node=6 main.py -c config_files/bert_biaffine.yaml
 ```
 
 ### 验证Dev

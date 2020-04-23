@@ -13,7 +13,7 @@ run:
   seed: 1234
   #只需要指定最大的epoch数量，不需要指定最大steps
   #可能的选择：80,150
-  max_train_epochs: 40
+  max_train_epochs: 4
   eval_epoch: 1
   early_stop: false
   early_stop_epochs: 6
