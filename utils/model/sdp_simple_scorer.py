@@ -1,7 +1,6 @@
 """
 Utils and wrappers for scoring parsers.
 """
-import sys
 
 '''
 def score(system_conllu_file, gold_conllu_file, verbose=True):
@@ -18,7 +17,7 @@ def score(system_conllu_file, gold_conllu_file, verbose=True):
     return p, r, f
 '''
 
-INF = float('inf')
+INF = float("inf")
 
 
 def conllu_file_2_sem16_file(conllu_filename):
@@ -28,12 +27,12 @@ def conllu_file_2_sem16_file(conllu_filename):
     :return:
     """
 
-    with open(conllu_filename, encoding='utf-8') as f:
-        with open(conllu_filename + '.sem16.sdp', 'w', encoding='utf-8') as g:
+    with open(conllu_filename, encoding="utf-8") as f:
+        with open(conllu_filename + ".sem16.sdp", "w", encoding="utf-8") as g:
             buff = []
             for line in f:
-                line = line.strip('\n')
-                items = line.split('\t')
+                line = line.strip("\n")
+                items = line.split("\t")
                 if len(items) == 10:
                     # Add it to the buffer
                     buff.append(items)
@@ -42,30 +41,34 @@ def conllu_file_2_sem16_file(conllu_filename):
                     # Process the buffer
                     for i, items in enumerate(buff):
                         # words.append(line)
-                        if items[8] != '_':
-                            nodes = items[8].split('|')
+                        if items[8] != "_":
+                            nodes = items[8].split("|")
                             for node in nodes:
                                 words = items
                                 # copy xpos to upos
                                 words[3] = words[4]
-                                node = node.split(':', 1)
+                                node = node.split(":", 1)
                                 node[0] = int(node[0])
-                                words[6], words[7], words[8] = str(node[0]), node[1], '_'
+                                words[6], words[7], words[8] = (
+                                    str(node[0]),
+                                    node[1],
+                                    "_",
+                                )
                                 # words[7] = node[1]
                                 # words[8] = '_'
-                                g.write('\t'.join(words) + '\n')
+                                g.write("\t".join(words) + "\n")
                         else:
-                            g.write('\t'.join(items) + '\n')
-                    g.write('\n')
+                            g.write("\t".join(items) + "\n")
+                    g.write("\n")
                     buff = []
-    return conllu_filename + '.sem16.sdp'
+    return conllu_filename + ".sem16.sdp"
 
 
 def stat_one_tree(lines):
     stat_data = {}
     for line in lines:
         payload = line.strip().split("\t")
-        if (len(payload) < 7):
+        if len(payload) < 7:
             print(lines)
         id_val = int(payload[0])
         form_val = payload[1]
@@ -79,12 +82,12 @@ def stat_one_tree(lines):
                 "id": id_val,
                 "form": form_val,
                 "heads": [head_val],
-                "deprels": [deprel_val]
+                "deprels": [deprel_val],
             }
         else:
-            assert (form_val == stat_data[id_val]["form"])
+            assert form_val == stat_data[id_val]["form"]
             stat_data[id_val]["heads"].append(head_val)
-            stat_data[id_val]['deprels'].append(deprel_val)
+            stat_data[id_val]["deprels"].append(deprel_val)
     return stat_data
 
 
@@ -108,8 +111,7 @@ def stat_one_node_heads_and_deprels(gold_heads, gold_deprels, test_heads, test_d
                 head_idx = test_heads.index(gold_head)
                 if gold_deprel == test_deprels[head_idx]:  # !! head_idx == deprel_idx
                     nr_right_deprels += 1
-    return (gold_len, test_len,
-            nr_right_heads, nr_right_deprels)
+    return (gold_len, test_len, nr_right_heads, nr_right_deprels)
 
 
 def stat_gold_and_test_data(gold_stat_data, test_stat_data):
@@ -121,14 +123,18 @@ def stat_gold_and_test_data(gold_stat_data, test_stat_data):
     for idx in gold_stat_data.keys():
         gold_node = gold_stat_data[idx]
         test_node = test_stat_data[idx]
-        assert (gold_node['id'] == test_node['id'])
+        assert gold_node["id"] == test_node["id"]
 
         (
-            gold_rels_len, test_rels_len,
-            nr_one_node_right_head, nr_one_node_right_deprel
-        ) = (
-            stat_one_node_heads_and_deprels(gold_node['heads'], gold_node['deprels'],
-                                            test_node['heads'], test_node['deprels'])
+            gold_rels_len,
+            test_rels_len,
+            nr_one_node_right_head,
+            nr_one_node_right_deprel,
+        ) = stat_one_node_heads_and_deprels(
+            gold_node["heads"],
+            gold_node["deprels"],
+            test_node["heads"],
+            test_node["deprels"],
         )
 
         nr_gold_rels += gold_rels_len
@@ -136,15 +142,18 @@ def stat_gold_and_test_data(gold_stat_data, test_stat_data):
         nr_head_right += nr_one_node_right_head
         nr_deprel_right += nr_one_node_right_deprel
 
-    return (nr_gold_rels, nr_test_rels,
-            nr_head_right, nr_deprel_right)
+    return (nr_gold_rels, nr_test_rels, nr_head_right, nr_deprel_right)
 
 
 def score(system_conllu_file, gold_conllu_file):
     system_sem16_file = conllu_file_2_sem16_file(system_conllu_file)
     gold_sem16_file = conllu_file_2_sem16_file(gold_conllu_file)
-    reference_dataset = open(gold_sem16_file, "r", encoding='utf-8').read().strip().split("\n\n")
-    answer_dataset = open(system_sem16_file, "r", encoding='utf-8').read().strip().split("\n\n")
+    reference_dataset = (
+        open(gold_sem16_file, "r", encoding="utf-8").read().strip().split("\n\n")
+    )
+    answer_dataset = (
+        open(system_sem16_file, "r", encoding="utf-8").read().strip().split("\n\n")
+    )
 
     assert len(reference_dataset) == len(answer_dataset), "Number of instance unequal."
     nr_total_gold_rels = 0
@@ -167,10 +176,11 @@ def score(system_conllu_file, gold_conllu_file):
             continue
 
         (
-            nr_one_gold_rels, nr_one_test_rels,
-            nr_one_head_right, nr_one_deprel_right
-        ) \
-            = stat_gold_and_test_data(reference_stat_data, answer_stat_data)
+            nr_one_gold_rels,
+            nr_one_test_rels,
+            nr_one_head_right,
+            nr_one_deprel_right,
+        ) = stat_gold_and_test_data(reference_stat_data, answer_stat_data)
 
         nr_total_gold_rels += nr_one_gold_rels
         nr_total_test_rels += nr_one_test_rels
@@ -179,11 +189,17 @@ def score(system_conllu_file, gold_conllu_file):
 
     nr_sentence -= length_error_num
 
-    LAS = float(2 * nr_total_right_deprels) / (nr_total_test_rels + nr_total_gold_rels) \
-        if (nr_total_gold_rels + nr_total_test_rels) != 0 else INF
+    LAS = (
+        float(2 * nr_total_right_deprels) / (nr_total_test_rels + nr_total_gold_rels)
+        if (nr_total_gold_rels + nr_total_test_rels) != 0
+        else INF
+    )
 
-    UAS = float(2 * nr_total_right_heads) / (nr_total_test_rels + nr_total_gold_rels) \
-        if (nr_total_gold_rels + nr_total_test_rels) != 0 else INF
+    UAS = (
+        float(2 * nr_total_right_heads) / (nr_total_test_rels + nr_total_gold_rels)
+        if (nr_total_gold_rels + nr_total_test_rels) != 0
+        else INF
+    )
     return UAS, LAS
 
 
@@ -196,15 +212,23 @@ def parse_conllu(f_object):
             sents.append(sent)
             sent = []
         else:
-            line = line.split('\t')
+            line = line.split("\t")
             sent.append(line[8])
     return sents
 
 
 def old_score(system_conllu_file, gold_conllu_file):
-    arc_total, arc_correct, arc_predict, label_total, label_correct, label_predict = 0, 0, 0, 0, 0, 0
-    with open(system_conllu_file, 'r', encoding='utf-8') as f_system, open(gold_conllu_file, 'r',
-                                                                           encoding='utf-8') as f_gold:
+    arc_total, arc_correct, arc_predict, label_total, label_correct, label_predict = (
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+    )
+    with open(system_conllu_file, "r", encoding="utf-8") as f_system, open(
+        gold_conllu_file, "r", encoding="utf-8"
+    ) as f_gold:
 
         sys_sents = []
         sys_sent = []
@@ -214,7 +238,7 @@ def old_score(system_conllu_file, gold_conllu_file):
                 sys_sents.append(sys_sent)
                 sys_sent = []
             else:
-                line = line.split('\t')
+                line = line.split("\t")
                 sys_sent.append(line[8])
 
         gold_sents = []
@@ -225,20 +249,20 @@ def old_score(system_conllu_file, gold_conllu_file):
                 gold_sents.append(gold_sent)
                 gold_sent = []
             else:
-                line = line.split('\t')
+                line = line.split("\t")
                 gold_sent.append(line[8])
 
         for sys_sent, gold_sent in zip(sys_sents, gold_sents):
             for system, gold in zip(sys_sent, gold_sent):
-                gold = gold.split('|')
-                system = system.split('|')
+                gold = gold.split("|")
+                system = system.split("|")
 
                 label_total += len(gold)
                 label_predict += len(system)
                 label_correct += len(list(set(gold) & set(system)))
 
-                gold_head = [arc.split(':')[0] for arc in gold]
-                sys_head = [arc.split(':')[0] for arc in system]
+                gold_head = [arc.split(":")[0] for arc in gold]
+                sys_head = [arc.split(":")[0] for arc in system]
 
                 arc_total += len(gold_head)
                 arc_predict += len(sys_head)
@@ -258,7 +282,7 @@ def old_score(system_conllu_file, gold_conllu_file):
     return UAS, LAS
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass
     # from run_utils.timer import Timer
     #

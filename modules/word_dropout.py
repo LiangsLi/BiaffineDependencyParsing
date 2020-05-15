@@ -8,6 +8,7 @@ class WordDropout(nn.Module):
     Implementation of word dropout. Randomly drops out entire words (or characters) in embedding space.
     Drop individual words instead of embedding units
     """
+
     def __init__(self, dropprob):
         super().__init__()
         self.dropprob = dropprob

@@ -11,4 +11,4 @@
 -------------------------------------------------
 """
 from .sort import unsort, sort, tensor_unsort
-from .parser_funs import sdp_decoder, parse_semgraph
+from .decoder import sdp_decoder, parse_semgraph

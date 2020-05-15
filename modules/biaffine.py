@@ -4,11 +4,11 @@ import torch.nn.functional as F
 
 
 class PairwiseBilinear(nn.Module):
-    '''
+    """
     使用版本
     A bilinear module that deals with broadcasting for efficient memory usage.
     Input: tensors of sizes (N x L1 x D1) and (N x L2 x D2)
-    Output: tensor of size (N x L1 x L2 x O)'''
+    Output: tensor of size (N x L1 x L2 x O)"""
 
     def __init__(self, input1_size, input2_size, output_size, bias=True):
         super().__init__()
@@ -30,8 +30,10 @@ class PairwiseBilinear(nn.Module):
         # ((N x L1) x D1) * (D1 x (D2 x O)) -> (N x L1) x (D2 x O)
         # [(batch_size*seq_len),(head_feat_size+1)] * [(head_feat_size+1),((dep_feat_size+1))*output_size]
         # -> [(batch_size*seq_len),((dep_feat_size+1))*output_size]
-        intermediate = torch.mm(input1.view(-1, input1_size[-1]),
-                                self.weight.view(-1, self.input2_size * self.output_size))
+        intermediate = torch.mm(
+            input1.view(-1, input1_size[-1]),
+            self.weight.view(-1, self.input2_size * self.output_size),
+        )
         # (N x L2 x D2) -> (N x D2 x L2)
         # input2 size: [batch_size, (dep_feat_size+1), seq_len]
         input2 = input2.transpose(1, 2)
@@ -42,10 +44,14 @@ class PairwiseBilinear(nn.Module):
 
         # [batch_size, (seq_len*output_size), (dep_feat_size+1)] * [batch_size, (dep_feat_size+1), seq_len]
         # -> [batch_size, (seq_len*output_size), seq_len]
-        output = intermediate.view(input1_size[0], input1_size[1] * self.output_size, input2_size[2]).bmm(input2)
+        output = intermediate.view(
+            input1_size[0], input1_size[1] * self.output_size, input2_size[2]
+        ).bmm(input2)
         # (N x (L1 x O) x L2) -> (N x L1 x L2 x O)
         # output size: [batch_size, seq_len, seq_len, output_size]
-        output = output.view(input1_size[0], input1_size[1], self.output_size, input2_size[1]).transpose(2, 3)
+        output = output.view(
+            input1_size[0], input1_size[1], self.output_size, input2_size[1]
+        ).transpose(2, 3)
 
         return output
 
@@ -65,9 +71,13 @@ class BiaffineScorer(nn.Module):
     def forward(self, input1, input2):
         # input1 size：[batch_size, seq_len, feature_size]
         # input1.new_ones(*input1.size()[:-1], 1)'s size: [batch_size, seq_len, 1]
-        input1 = torch.cat([input1, input1.new_ones(*input1.size()[:-1], 1)], len(input1.size()) - 1)
+        input1 = torch.cat(
+            [input1, input1.new_ones(*input1.size()[:-1], 1)], len(input1.size()) - 1
+        )
         # 拼接后的size:[batch_size, seq_len, (feature_size+1)]
-        input2 = torch.cat([input2, input2.new_ones(*input2.size()[:-1], 1)], len(input2.size()) - 1)
+        input2 = torch.cat(
+            [input2, input2.new_ones(*input2.size()[:-1], 1)], len(input2.size()) - 1
+        )
         return self.W_bilin(input1, input2)
 
 
@@ -98,9 +108,13 @@ class PairwiseBiaffineScorer(nn.Module):
     def forward(self, input1, input2):
         # input1 size：[batch_size, seq_len, feature_size]
         # input1.new_ones(*input1.size()[:-1], 1)'s size: [batch_size, seq_len, 1]
-        input1 = torch.cat([input1, input1.new_ones(*input1.size()[:-1], 1)], len(input1.size()) - 1)
+        input1 = torch.cat(
+            [input1, input1.new_ones(*input1.size()[:-1], 1)], len(input1.size()) - 1
+        )
         # 拼接后的size:[batch_size, seq_len, (feature_size+1)]
-        input2 = torch.cat([input2, input2.new_ones(*input2.size()[:-1], 1)], len(input2.size()) - 1)
+        input2 = torch.cat(
+            [input2, input2.new_ones(*input2.size()[:-1], 1)], len(input2.size()) - 1
+        )
         return self.W_bilin(input1, input2)
 
 
@@ -117,8 +131,16 @@ class DirectBiaffineScorer(nn.Module):
 
 
 class DeepBiaffineScorer(nn.Module):
-    def __init__(self, input1_size, input2_size, hidden_size, output_size, hidden_func=F.relu, dropout=0,
-                 pairwise=True):
+    def __init__(
+        self,
+        input1_size,
+        input2_size,
+        hidden_size,
+        output_size,
+        hidden_func=F.relu,
+        dropout=0,
+        pairwise=True,
+    ):
         """
         使用版本
         :param input1_size:
@@ -143,8 +165,10 @@ class DeepBiaffineScorer(nn.Module):
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, input1, input2):
-        return self.scorer(self.dropout(self.hidden_func(self.W1(input1))),
-                           self.dropout(self.hidden_func(self.W2(input2))))
+        return self.scorer(
+            self.dropout(self.hidden_func(self.W1(input1))),
+            self.dropout(self.hidden_func(self.W2(input2))),
+        )
 
 
 if __name__ == "__main__":

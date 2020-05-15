@@ -4,8 +4,8 @@
 
 class GraphVocab(object):
     def __init__(self, vocab_file):
-        self.id2unit = ['<EMPTY>', '<UNK>']
-        with open(vocab_file, encoding='utf-8')as f:
+        self.id2unit = ["<EMPTY>", "<UNK>"]
+        with open(vocab_file, encoding="utf-8") as f:
             for line in f:
                 if line.strip() not in self.id2unit:
                     self.id2unit.append(line.strip())
@@ -25,18 +25,18 @@ class GraphVocab(object):
                     deprel = self.id2unit[a[1]]
                     arc.append([head, deprel])
                 if len(arc) == 1:
-                    string = ':'.join(arc[0])
+                    string = ":".join(arc[0])
                     words.append(string)
                 else:
-                    string = ''
+                    string = ""
                     for item in arc:
-                        string += ':'.join(item) + '|'
+                        string += ":".join(item) + "|"
                     words.append(string[:-1])
             sents.append(words)
         return sents
 
 
-if __name__ == '__main__':
-    vocab = GraphVocab('../dataset/graph_vocab.txt')
+if __name__ == "__main__":
+    vocab = GraphVocab("../dataset/graph_vocab.txt")
     print(vocab.id2unit)
     print(vocab.unit2id)

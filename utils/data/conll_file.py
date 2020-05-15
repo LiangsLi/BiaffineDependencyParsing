@@ -3,29 +3,33 @@ A wrapper/loader for the official conll-u format files.
 """
 import os
 import io
-from typing import List, Tuple
+from typing import List
 
 FIELD_NUM = 10
 
-FIELD_TO_IDX = {'id': 0, 'word': 1, 'lemma': 2, 'upos': 3, 'xpos': 4,
-                'feats': 5, 'head': 6, 'deprel': 7, 'deps': 8,
-                'misc': 9}
+FIELD_TO_IDX = {
+    "id": 0,
+    "word": 1,
+    "lemma": 2,
+    "upos": 3,
+    "xpos": 4,
+    "feats": 5,
+    "head": 6,
+    "deprel": 7,
+    "deps": 8,
+    "misc": 9,
+}
 
 
 class CoNLLFile(object):
-    def __init__(
-            self,
-            filename=None,
-            input_str=None,
-            ignore_gapping=True
-    ):
+    def __init__(self, filename=None, input_str=None, ignore_gapping=True):
         # If ignore_gapping is True, all words that are gap fillers
         # (identified with a period in the sentence index) will be ignored.
         self.ignore_gapping = ignore_gapping
         if filename is not None and not os.path.exists(filename):
             raise Exception("File not found at: " + filename)
         if filename:
-            assert filename.endswith('conllu'), "Loaded file must be conllu file."
+            assert filename.endswith("conllu"), "Loaded file must be conllu file."
         if filename is None:
             assert input_str is not None and len(input_str) > 0
             self._file = input_str
@@ -48,7 +52,7 @@ class CoNLLFile(object):
         if self._from_str:
             infile = io.StringIO(self.file)
         else:
-            infile = open(self.file, encoding='utf-8')
+            infile = open(self.file, encoding="utf-8")
         while True:
             line = infile.readline()
             if len(line) == 0:
@@ -59,10 +63,10 @@ class CoNLLFile(object):
                     sents.append(cache)
                     cache = []
             else:
-                if line.startswith('#'):  # skip comment line
+                if line.startswith("#"):  # skip comment line
                     continue
-                array = line.split('\t')
-                if self.ignore_gapping and '.' in array[0]:
+                array = line.split("\t")
+                if self.ignore_gapping and "." in array[0]:
                     continue
                 assert len(array) == FIELD_NUM
                 cache += [array]
@@ -78,7 +82,7 @@ class CoNLLFile(object):
 
     @property
     def sents(self):
-        if not hasattr(self, '_sents'):
+        if not hasattr(self, "_sents"):
             self._sents = self.load_conll()
         return self._sents
 
@@ -88,11 +92,11 @@ class CoNLLFile(object):
     @property
     def num_words(self):
         """ Num of total words, after multi-word expansion."""
-        if not hasattr(self, '_num_words'):
+        if not hasattr(self, "_num_words"):
             n = 0
             for sent in self.sents:
                 for ln in sent:
-                    if '-' not in ln[0]:
+                    if "-" not in ln[0]:
                         n += 1
             self._num_words = n
         return self._num_words
@@ -109,7 +113,7 @@ class CoNLLFile(object):
         for sent in self.sents:
             cursent = []
             for ln in sent:
-                if '-' in ln[0]:  # skip
+                if "-" in ln[0]:  # skip
                     continue
                 if len(field_idxs) == 1:
                     cursent += [ln[field_idxs[0]]]
@@ -128,7 +132,9 @@ class CoNLLFile(object):
         then a list of content will be expected; otherwise a list of list of contents will be expected.
         """
         assert isinstance(fields, list), "Must provide field names as a list."
-        assert isinstance(contents, list), "Must provide contents as a list (one item per line)."
+        assert isinstance(
+            contents, list
+        ), "Must provide contents as a list (one item per line)."
         assert len(fields) >= 1, "Must have at least one field."
         if self.num_words != len(contents):
             print("Contents must have the same number as the original file.")
@@ -136,7 +142,7 @@ class CoNLLFile(object):
         cidx = 0
         for sent in self.sents:
             for ln in sent:
-                if '-' in ln[0]:
+                if "-" in ln[0]:
                     continue
                 if len(field_idxs) == 1:
                     try:
@@ -149,10 +155,12 @@ class CoNLLFile(object):
                         print(field_idxs)
                         raise e
 
-                    if fields == ['deps']:
-                        head_value, deprel_value = contents[cidx].split('|')[0].split(':')
-                        ln[FIELD_TO_IDX['head']] = head_value
-                        ln[FIELD_TO_IDX['deprel']] = deprel_value
+                    if fields == ["deps"]:
+                        head_value, deprel_value = (
+                            contents[cidx].split("|")[0].split(":")
+                        )
+                        ln[FIELD_TO_IDX["head"]] = head_value
+                        ln[FIELD_TO_IDX["deprel"]] = deprel_value
                 else:
                     for fid, ct in zip(field_idxs, contents[cidx]):
                         ln[fid] = ct
@@ -163,7 +171,7 @@ class CoNLLFile(object):
         """ Write current conll contents to file.
         """
         conll_string = self.conll_as_string()
-        with open(filename, 'w', encoding='utf-8') as outfile:
+        with open(filename, "w", encoding="utf-8") as outfile:
             outfile.write(conll_string)
         return
 
@@ -173,22 +181,24 @@ class CoNLLFile(object):
         return_string = ""
         for sent in self.sents:
             for ln in sent:
-                return_string += ("\t".join(ln) + "\n")
+                return_string += "\t".join(ln) + "\n"
             return_string += "\n"
         return return_string
 
     def write_conll_with_lemmas(self, lemmas, filename):
         """ Write a new conll file, but use the new lemmas to replace the old ones."""
-        assert self.num_words == len(lemmas), "Num of lemmas does not match the number in original data file."
-        lemma_idx = FIELD_TO_IDX['lemma']
+        assert self.num_words == len(
+            lemmas
+        ), "Num of lemmas does not match the number in original data file."
+        lemma_idx = FIELD_TO_IDX["lemma"]
         idx = 0
-        with open(filename, 'w') as outfile:
+        with open(filename, "w") as outfile:
             for sent in self.sents:
                 for ln in sent:
-                    if '-' not in ln[0]:  # do not process if it is a mwt line
+                    if "-" not in ln[0]:  # do not process if it is a mwt line
                         lm = lemmas[idx]
                         if len(lm) == 0:
-                            lm = '_'
+                            lm = "_"
                         ln[lemma_idx] = lm
                         idx += 1
                     print("\t".join(ln), file=outfile)
@@ -196,20 +206,20 @@ class CoNLLFile(object):
         return
 
     def get_mwt_expansions(self):
-        word_idx = FIELD_TO_IDX['word']
+        word_idx = FIELD_TO_IDX["word"]
         expansions = []
-        src = ''
+        src = ""
         dst = []
         for sent in self.sents:
             mwt_begin = 0
             mwt_end = -1
             for ln in sent:
-                if '.' in ln[0]:
+                if "." in ln[0]:
                     # skip ellipsis
                     continue
 
-                if '-' in ln[0]:
-                    mwt_begin, mwt_end = [int(x) for x in ln[0].split('-')]
+                if "-" in ln[0]:
+                    mwt_begin, mwt_end = [int(x) for x in ln[0].split("-")]
                     src = ln[word_idx]
                     continue
 
@@ -217,14 +227,14 @@ class CoNLLFile(object):
                     dst += [ln[word_idx]]
                 elif int(ln[0]) == mwt_end:
                     dst += [ln[word_idx]]
-                    expansions += [[src, ' '.join(dst)]]
-                    src = ''
+                    expansions += [[src, " ".join(dst)]]
+                    src = ""
                     dst = []
 
         return expansions
 
     def get_mwt_expansion_cands(self):
-        word_idx = FIELD_TO_IDX['word']
+        word_idx = FIELD_TO_IDX["word"]
         cands = []
         for sent in self.sents:
             for ln in sent:
@@ -243,26 +253,48 @@ class CoNLLFile(object):
             for ln in sent:
                 idx += 1
                 if "MWT=Yes" not in ln[-1]:
-                    print("{}\t{}".format(idx, "\t".join(ln[1:6] + [str(idx - 1)] + ln[7:])), file=output_file)
+                    print(
+                        "{}\t{}".format(
+                            idx, "\t".join(ln[1:6] + [str(idx - 1)] + ln[7:])
+                        ),
+                        file=output_file,
+                    )
                 else:
                     # print MWT expansion
-                    expanded = [x for x in expansions[count].split(' ') if len(x) > 0]
+                    expanded = [x for x in expansions[count].split(" ") if len(x) > 0]
                     count += 1
                     endidx = idx + len(expanded) - 1
 
-                    print("{}-{}\t{}".format(idx, endidx,
-                                             "\t".join(['_' if i == 5 or i == 8 else x for i, x in enumerate(ln[1:])])),
-                          file=output_file)
+                    print(
+                        "{}-{}\t{}".format(
+                            idx,
+                            endidx,
+                            "\t".join(
+                                [
+                                    "_" if i == 5 or i == 8 else x
+                                    for i, x in enumerate(ln[1:])
+                                ]
+                            ),
+                        ),
+                        file=output_file,
+                    )
                     for e_i, e_word in enumerate(expanded):
-                        print("{}\t{}\t{}".format(idx + e_i, e_word,
-                                                  "\t".join(['_'] * 4 + [str(idx + e_i - 1)] + ['_'] * 3)),
-                              file=output_file)
+                        print(
+                            "{}\t{}\t{}".format(
+                                idx + e_i,
+                                e_word,
+                                "\t".join(["_"] * 4 + [str(idx + e_i - 1)] + ["_"] * 3),
+                            ),
+                            file=output_file,
+                        )
                     idx = endidx
 
             print("", file=output_file)
             idx = 0
 
-        assert count == len(expansions), "{} {} {}".format(count, len(expansions), expansions)
+        assert count == len(expansions), "{} {} {}".format(
+            count, len(expansions), expansions
+        )
         return
 
 
@@ -296,7 +328,7 @@ def load_conllu_file(filename):
     :return:
     """
     conll_file = CoNLLFile(filename)
-    data = conll_file.get(['word', 'upos', 'deps'], as_sentences=True)
+    data = conll_file.get(["word", "upos", "deps"], as_sentences=True)
     # data= [
     #             [ #sent1
     #                   [word1,pos1,deps1],
@@ -328,8 +360,8 @@ def load_conllu_file(filename):
     return conll_file, CoNLLUData(data)
 
 
-if __name__ == '__main__':
-    from pprint import pprint
+if __name__ == "__main__":
+    pass
 
     # 测试读取：
     file_name = "../dataset/test/sdp_text_test.conllu"

@@ -5,7 +5,7 @@ import mplcyberpunk
 import pandas as pd
 
 
-def load_data(file_path='metrics.csv'):
+def load_data(file_path="metrics.csv"):
     df = pd.read_csv(file_path)
     data = {}
     for _, r in df.iterrows():
@@ -25,9 +25,9 @@ plt.ylabel("LAS", fontsize=15)
 plt.xticks(fontsize=15)
 plt.yticks(fontsize=15)
 
-xs = ['TextBook', 'News']
+xs = ["TextBook", "News"]
 for y in ys_data:
-    plt.plot(xs, ys_data[y], marker='o', label=y)
+    plt.plot(xs, ys_data[y], marker="o", label=y)
 for ys in ys_data:
     for x, y in zip(xs, ys_data[ys]):
         plt.text(x, y, y, fontsize=10)
@@ -36,8 +36,8 @@ plt.legend(fontsize=14)
 plt.grid(True)
 
 mplcyberpunk.add_glow_effects()
-plt.savefig('metrics_line.svg')
+plt.savefig("metrics_line.svg")
 plt.show()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

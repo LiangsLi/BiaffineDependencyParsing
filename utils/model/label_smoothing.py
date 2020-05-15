@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 # Created by li huayong on 2019/11/6
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
 
 
-def label_smoothed_kl_div_loss(logits, target, class_num, smothing=0.0, reduction='sum'):
+def label_smoothed_kl_div_loss(
+    logits, target, class_num, smothing=0.0, reduction="sum"
+):
     """
         函数版本的LabelSmoothedKLDivLoss,两者结果完全一样
     :param logits:
@@ -36,5 +37,5 @@ def label_smoothed_kl_div_loss(logits, target, class_num, smothing=0.0, reductio
     return F.kl_div(preds, smoothed_target, reduction=reduction)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

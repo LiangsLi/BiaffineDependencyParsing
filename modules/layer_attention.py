@@ -21,13 +21,15 @@ class LayerAttention(torch.nn.Module):
     should redistribute dropped probability mass to all other weights.
     """
 
-    def __init__(self,
-                 mixture_size: int,
-                 do_layer_norm: bool = False,
-                 initial_scalar_parameters: List[float] = None,
-                 trainable: bool = True,
-                 dropout: float = None,
-                 dropout_value: float = -1e20) -> None:
+    def __init__(
+        self,
+        mixture_size: int,
+        do_layer_norm: bool = False,
+        initial_scalar_parameters: List[float] = None,
+        trainable: bool = True,
+        dropout: float = None,
+        dropout_value: float = -1e20,
+    ) -> None:
         """
 
         :param mixture_size: 混合的Layer层数
@@ -46,12 +48,17 @@ class LayerAttention(torch.nn.Module):
             initial_scalar_parameters = [0.0] * mixture_size
         elif len(initial_scalar_parameters) != mixture_size:
             raise ValueError(
-                "Length of initial_scalar_parameters {} differs from mixture_size {}".format(initial_scalar_parameters,
-                                                                                             mixture_size))
+                "Length of initial_scalar_parameters {} differs from mixture_size {}".format(
+                    initial_scalar_parameters, mixture_size
+                )
+            )
         # 训练参数化
         self.scalar_parameters = nn.ParameterList(
             [
-                nn.Parameter(torch.FloatTensor([initial_scalar_parameters[i]]), requires_grad=trainable)
+                nn.Parameter(
+                    torch.FloatTensor([initial_scalar_parameters[i]]),
+                    requires_grad=trainable,
+                )
                 for i in range(mixture_size)
             ]
         )
@@ -64,8 +71,11 @@ class LayerAttention(torch.nn.Module):
             self.register_buffer("dropout_mask", dropout_mask)
             self.register_buffer("dropout_fill", dropout_fill)
 
-    def forward(self, tensors: List[torch.Tensor],  # pylint: disable=arguments-differ
-                mask: torch.Tensor = None) -> torch.Tensor:
+    def forward(
+        self,
+        tensors: List[torch.Tensor],  # pylint: disable=arguments-differ
+        mask: torch.Tensor = None,
+    ) -> torch.Tensor:
         """
         Compute a weighted average of the ``tensors``.  The input tensors an be any shape
         with at least two dimensions, but must all be the same shape.
@@ -79,19 +89,26 @@ class LayerAttention(torch.nn.Module):
         """
         assert isinstance(tensors, list) or isinstance(tensors, tuple), type(tensors)
         if len(tensors) != self.mixture_size:
-            raise ValueError("{} tensors were passed, but the module was initialized to "
-                             "mix {} tensors.".format(len(tensors), self.mixture_size))
+            raise ValueError(
+                "{} tensors were passed, but the module was initialized to "
+                "mix {} tensors.".format(len(tensors), self.mixture_size)
+            )
 
         def _do_layer_norm(tensor, broadcast_mask, num_elements_not_masked):
             tensor_masked = tensor * broadcast_mask
             mean = torch.sum(tensor_masked) / num_elements_not_masked
-            variance = torch.sum(((tensor_masked - mean) * broadcast_mask) ** 2) / num_elements_not_masked
-            return (tensor - mean) / torch.sqrt(variance + 1E-12)
+            variance = (
+                torch.sum(((tensor_masked - mean) * broadcast_mask) ** 2)
+                / num_elements_not_masked
+            )
+            return (tensor - mean) / torch.sqrt(variance + 1e-12)
 
         weights = torch.cat([parameter for parameter in self.scalar_parameters])
 
         if self.dropout:
-            weights = torch.where(self.dropout_mask.uniform_() > self.dropout, weights, self.dropout_fill)
+            weights = torch.where(
+                self.dropout_mask.uniform_() > self.dropout, weights, self.dropout_fill
+            )
 
         # attention权重归一化：
         normed_weights = torch.nn.functional.softmax(weights, dim=0)
@@ -111,6 +128,8 @@ class LayerAttention(torch.nn.Module):
 
             pieces = []
             for weight, tensor in zip(normed_weights, tensors):
-                pieces.append(weight * _do_layer_norm(tensor,
-                                                      broadcast_mask, num_elements_not_masked))
+                pieces.append(
+                    weight
+                    * _do_layer_norm(tensor, broadcast_mask, num_elements_not_masked)
+                )
             return self.gamma * sum(pieces)

@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 # Created by li huayong on 2019/11/3
-import torch
 import torch.nn as nn
-from fairseq.modules import LayerNorm, MultiheadAttention
+from fairseq.modules import MultiheadAttention
 
 
 def init_bert_params(module):
@@ -29,5 +28,5 @@ def init_bert_params(module):
         module.in_proj_weight.data.normal_(mean=0.0, std=0.02)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

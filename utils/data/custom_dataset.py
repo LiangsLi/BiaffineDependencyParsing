@@ -1,5 +1,3 @@
-import bisect
-import warnings
 from torch.utils.data import Dataset, TensorDataset
 from torch.utils.data import IterableDataset
 import numpy as np
@@ -16,7 +14,13 @@ class ConcatTensorRandomDataset(Dataset):
     （4）采样时，首先决定从哪个源取样（根据权值或者指数平滑概率），确定目标源之后，会随机从目标源采样
     """
 
-    def __init__(self, datasets: List[TensorDataset], probs: List[float] = None, exp: float = None, mode: str = 'exp'):
+    def __init__(
+        self,
+        datasets: List[TensorDataset],
+        probs: List[float] = None,
+        exp: float = None,
+        mode: str = "exp",
+    ):
         """
 
         :param datasets: 各个源本身的Data Set
@@ -25,9 +29,9 @@ class ConcatTensorRandomDataset(Dataset):
         :param mode:指示是采用概率采样还是采用指数平滑采样
         """
         super().__init__()
-        assert len(datasets) > 0, 'datasets should not be an empty iterable'
-        assert mode in ['prob', 'exp'], 'ConcatTensorRandomDataset mode只能为prob或者exp'
-        if mode == 'prob':
+        assert len(datasets) > 0, "datasets should not be an empty iterable"
+        assert mode in ["prob", "exp"], "ConcatTensorRandomDataset mode只能为prob或者exp"
+        if mode == "prob":
             assert probs and len(probs) == len(datasets) and sum(probs) == 1
         else:
             assert exp and 0 < exp < 1
@@ -36,9 +40,11 @@ class ConcatTensorRandomDataset(Dataset):
         self.dataset_lens = [len(x) for x in self.datasets]
         self.original_lengths = []  # 记录每个源的原始数据长度
         for d in self.datasets:
-            assert not isinstance(d, IterableDataset), "ConcatDataset does not support IterableDataset"
+            assert not isinstance(
+                d, IterableDataset
+            ), "ConcatDataset does not support IterableDataset"
             self.original_lengths.append(len(d))
-        if mode == 'exp':
+        if mode == "exp":
             original_probs = self.original_lengths / np.sum(self.original_lengths)
             # 指数加权
             probs_exp = original_probs ** exp
@@ -56,7 +62,9 @@ class ConcatTensorRandomDataset(Dataset):
     def __getitem__(self, idx):
         if idx < 0:
             if -idx > len(self):
-                raise ValueError("absolute value of index should not exceed dataset length")
+                raise ValueError(
+                    "absolute value of index should not exceed dataset length"
+                )
             idx = len(self) + idx
         # 依据概率决定从哪个源采样
         target_dataset_idx = np.random.choice(self.dataset_idxs, p=self.probs)

@@ -12,5 +12,5 @@
 """
 
 
-class TransformerBiaffine(object):
-    raise NotImplementedError('')
+class TransformerBiaffine:
+    raise NotImplementedError("")

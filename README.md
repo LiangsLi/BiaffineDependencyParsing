@@ -40,7 +40,7 @@ git submodule update --remote
 git clone https://github.com/NLPInBLCU/BiaffineDependencyParsing assets --recursive
 ```
 ## 使用
-
+帮助信息：`python main.py -h`
 ### 训练Train
 查看帮助信息：`python main.py train -h`
 

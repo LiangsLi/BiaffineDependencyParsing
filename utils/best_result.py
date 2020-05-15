@@ -31,10 +31,12 @@ class BestResult(object):
         return new_best
 
     def __str__(self):
-        return f'The best LAS: {self.best_LAS} in {self.best_LAS_epoch} epochs;\n' \
-               f'The best UAS: {self.best_UAS} in {self.best_UAS_epoch} epochs.'
+        return (
+            f"The best LAS: {self.best_LAS} in {self.best_LAS_epoch} epochs;\n"
+            f"The best UAS: {self.best_UAS} in {self.best_UAS_epoch} epochs."
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     best_result = BestResult()
     print(best_result)

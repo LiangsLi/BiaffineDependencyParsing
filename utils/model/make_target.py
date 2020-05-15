@@ -73,7 +73,7 @@ def make_discriminator_target(sent_num, task_id, use_cuda=False):
     return labels
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     def make_label_target(arcs, max_seq_length):
         graphs = [[0] * max_seq_length for _ in range(max_seq_length)]
@@ -83,7 +83,6 @@ if __name__ == '__main__':
                 rel_idx = arc[1]
                 graphs[word_idx][head_idx] = rel_idx
         return graphs
-
 
     file_name = "../dataset/test/sdp_text_test.conllu"
     conllu_file, data = load_conllu_file(file_name)

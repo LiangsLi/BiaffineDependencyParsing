@@ -9,7 +9,10 @@ class BERTologyBaseTrainer(BaseDependencyTrainer):
     def __init__(self, config, *args, **kwargs):
         super().__init__(config, *args, **kwargs)
         if config.freeze:
-            assert config.freeze_bertology_layers >= -1 and config.freeze_epochs in ['all', 'first']
+            assert config.freeze_bertology_layers >= -1 and config.freeze_epochs in [
+                "all",
+                "first",
+            ]
         self._freeze = config.freeze
         self._freeze_layers = config.freeze_bertology_layers
         self._freeze_epochs = config.freeze_epochs
@@ -20,26 +23,32 @@ class BERTologyBaseTrainer(BaseDependencyTrainer):
 
     def _unpack_batch(self, batch):
         inputs = {
-            'input_ids': batch[0],
-            'attention_mask': batch[1],  # 默认 1 代表 实际输入； 0 代表 padding
-            'token_type_ids': batch[2] if self.configs.encoder_type in ['bertology', 'xlnet'] else None,
-            'start_pos': batch[3],
-            'end_pos': batch[4],
+            "input_ids": batch[0],
+            "attention_mask": batch[1],  # 默认 1 代表 实际输入； 0 代表 padding
+            "token_type_ids": batch[2]
+            if self.configs.encoder_type in ["bertology", "xlnet"]
+            else None,
+            "start_pos": batch[3],
+            "end_pos": batch[4],
         }
         dep_ids = batch[5]
         if self.configs.use_pos:
             pos_ids = batch[6]
         # word_mask:以word为单位，1为真实输入，0为PAD
-        word_mask = (batch[3] != (self.configs.max_seq_len - 1)).to(torch.long).to(self.configs.device)
+        word_mask = (
+            (batch[3] != (self.configs.max_seq_len - 1))
+            .to(torch.long)
+            .to(self.configs.device)
+        )
         sent_len = torch.sum(word_mask, 1).cpu().tolist()
         unpacked_batch = {
-            'inputs': inputs,
-            'word_mask': word_mask,
-            'sent_len': sent_len,
-            'dep_ids': dep_ids,
+            "inputs": inputs,
+            "word_mask": word_mask,
+            "sent_len": sent_len,
+            "dep_ids": dep_ids,
         }
         if self.configs.use_pos:
-            unpacked_batch['pos_ids'] = pos_ids
+            unpacked_batch["pos_ids"] = pos_ids
         return unpacked_batch
 
     def _custom_train_operations(self, epoch):
@@ -56,20 +65,21 @@ class BERTologyBaseTrainer(BaseDependencyTrainer):
                 # 利用正则识别参数名，对其进行freeze
                 for name, para in self.model.named_parameters():
                     # Freeze BERTology embedding layer
-                    if 'encoder.bertology.embeddings.' in name:
+                    if "encoder.bertology.embeddings." in name:
                         para.requires_grad = False
                         self._freeze_parameter_names.append(name)
                     # Freeze other BERTology Layers
                     # 如果self._freeze_layers > -1；则说明除了freeze embedding层之外，还要freeze别的层
                     if self._freeze_layers > -1:
                         if re.match(
-                                f'^.+encoder\.bertology\.encoder\.layer\.[0-{self._freeze_layers}]\..+',
-                                name):
+                            f"^.+encoder\.bertology\.encoder\.layer\.[0-{self._freeze_layers}]\..+",
+                            name,
+                        ):
                             para.requires_grad = False
                         self._freeze_parameter_names.append(name)
             else:
                 # 如果_freeze_epochs == ‘all’,则此时不需要做任何事情，因为第一个epoch已经freeze过了
-                if self._freeze_epochs == 'first':
+                if self._freeze_epochs == "first":
                     # 仅在第一个epoch freeze参数
                     # epoch大于1的时候不再需要freeze了
                     # 此时将_freeze_parameter_names中的参数重新设置为需要计算梯度
@@ -78,5 +88,5 @@ class BERTologyBaseTrainer(BaseDependencyTrainer):
                             para.requires_grad = True
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

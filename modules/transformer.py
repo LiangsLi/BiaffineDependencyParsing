@@ -67,35 +67,35 @@ class TransformerSentenceEncoder(nn.Module):
     """
 
     def __init__(
-            self,
-            padding_idx: int,
-            vocab_size: int,
-            num_encoder_layers: int = 6,
-            embedding_dim: int = 768,
-            ffn_embedding_dim: int = 3072,
-            num_attention_heads: int = 8,
-            dropout: float = 0.1,
-            attention_dropout: float = 0.1,
-            activation_dropout: float = 0.1,
-            max_seq_len: int = 256,
-            # num_segments: int = 2,
-            use_position_embeddings: bool = True,
-            offset_positions_by_padding: bool = True,
-            encoder_normalize_before: bool = False,
-            apply_bert_init: bool = True,
-            activation_fn: str = "relu",
-            learned_pos_embedding: bool = True,
-            add_bias_kv: bool = False,
-            add_zero_attn: bool = False,
-            embed_scale: float = None,
-            freeze_embeddings: bool = False,
-            n_trans_layers_to_freeze: int = 0,
-            export: bool = False,
-            use_residual: bool = True,
-            use_norm: bool = True,
-            use_pretrain: bool = False,
-            pretrain_vectors=None,
-            pretrain_dim: int = 200,
+        self,
+        padding_idx: int,
+        vocab_size: int,
+        num_encoder_layers: int = 6,
+        embedding_dim: int = 768,
+        ffn_embedding_dim: int = 3072,
+        num_attention_heads: int = 8,
+        dropout: float = 0.1,
+        attention_dropout: float = 0.1,
+        activation_dropout: float = 0.1,
+        max_seq_len: int = 256,
+        # num_segments: int = 2,
+        use_position_embeddings: bool = True,
+        offset_positions_by_padding: bool = True,
+        encoder_normalize_before: bool = False,
+        apply_bert_init: bool = True,
+        activation_fn: str = "relu",
+        learned_pos_embedding: bool = True,
+        add_bias_kv: bool = False,
+        add_zero_attn: bool = False,
+        embed_scale: float = None,
+        freeze_embeddings: bool = False,
+        n_trans_layers_to_freeze: int = 0,
+        export: bool = False,
+        use_residual: bool = True,
+        use_norm: bool = True,
+        use_pretrain: bool = False,
+        pretrain_vectors=None,
+        pretrain_dim: int = 200,
     ) -> None:
 
         super().__init__()
@@ -124,7 +124,9 @@ class TransformerSentenceEncoder(nn.Module):
             )
 
         if self.use_pretrain and self.pretrain_dim % num_attention_heads != 0:
-            self.pretrain_emb_transfer = nn.Linear(self.pretrain_dim, self.embedding_dim)
+            self.pretrain_emb_transfer = nn.Linear(
+                self.pretrain_dim, self.embedding_dim
+            )
             print("Use the pre-trained embedding transfer layer")
         else:
             self.pretrain_emb_transfer = None
@@ -142,7 +144,7 @@ class TransformerSentenceEncoder(nn.Module):
             if self.use_position_embeddings
             else None
         )
-        print(f'position embedding: {self.embed_positions}')
+        print(f"position embedding: {self.embed_positions}")
 
         # Transformer Layers:
         self.layers = nn.ModuleList(
@@ -182,7 +184,7 @@ class TransformerSentenceEncoder(nn.Module):
             # self.embed_tokens.from_pretrained(pretrain_vectors, freeze=freeze_embeddings)
             self.embed_tokens.weight.data.copy_(pretrain_vectors)
             self.embed_tokens.weight.requires_grad = not freeze_embeddings
-            print(f'Use the pre-train embedding(freeze={freeze_embeddings}):')
+            print(f"Use the pre-train embedding(freeze={freeze_embeddings}):")
             # print(pretrain_vectors)
 
         def freeze_module_params(m):
@@ -199,11 +201,11 @@ class TransformerSentenceEncoder(nn.Module):
         #     freeze_module_params(self.layers[layer])
 
     def forward(
-            self,
-            tokens: torch.Tensor,
-            # segment_labels: torch.Tensor = None,
-            last_state_only: bool = False,
-            positions: Optional[torch.Tensor] = None,
+        self,
+        tokens: torch.Tensor,
+        # segment_labels: torch.Tensor = None,
+        last_state_only: bool = False,
+        positions: Optional[torch.Tensor] = None,
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         # compute padding mask. This is needed for multi-head attention
         padding_mask = tokens.eq(self.padding_idx)
