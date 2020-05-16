@@ -1,11 +1,11 @@
-# -*- coding: utf-8 -*-
 # Created by li huayong on 2019/9/24
 """
     在train/test/inference之前必须先建立依存标签的vocab,
     在train/test/inference时应该使用同一份vocab
 """
-from pathlib import Path
 from collections import Counter
+from pathlib import Path
+
 from utils.data.conll_file import load_conllu_file
 
 

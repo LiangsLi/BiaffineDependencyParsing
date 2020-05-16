@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 -------------------------------------------------
    File Name：     best_result
@@ -12,7 +11,7 @@
 """
 
 
-class BestResult(object):
+class BestResult:
     def __init__(self):
         self.best_LAS = -1
         self.best_UAS = -1

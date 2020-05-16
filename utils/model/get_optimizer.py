@@ -1,11 +1,13 @@
-# -*- coding: utf-8 -*-
 # Created by li huayong on 2019/10/7
 import math
+
+import pytorch_transformers.optimization as huggingfaceOptim  # 避免和torch.optim重名
 import torch
 
+from PyToolkit.PyToolkit import debug_print
+from PyToolkit.PyToolkit import get_logger
+
 # from model.optimization import *
-import pytorch_transformers.optimization as huggingfaceOptim  # 避免和torch.optim重名
-from PyToolkit.PyToolkit import get_logger, debug_print
 
 
 def get_optimizer_old(
@@ -22,7 +24,7 @@ def get_optimizer_old(
     elif name == "adamax":
         return torch.optim.Adamax(parameters)  # use default lr
     else:
-        raise Exception("Unsupported optimizer: {}".format(name))
+        raise Exception(f"Unsupported optimizer: {name}")
 
 
 def _get_bertology_optimizer_grouped_parameters(args, model):
@@ -151,7 +153,7 @@ def get_optimizer(args, model):
         optimizer = torch.optim.Adamax(model.parameters())  # use default lr
         scheduler = None
     else:
-        raise Exception("Unsupported optimizer: {}".format(args.optimizer))
+        raise Exception(f"Unsupported optimizer: {args.optimizer}")
     return optimizer, scheduler
 
 

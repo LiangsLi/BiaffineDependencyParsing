@@ -1,10 +1,11 @@
-# -*- coding: utf-8 -*-
 # Created by li huayong on 2019/10/8
-from pathlib import Path
 import argparse
-import yaml
+import typing
+from pathlib import Path
 from types import SimpleNamespace
 from typing import Dict
+
+import yaml
 
 
 def load_configs_from_yaml(yaml_file: str) -> Dict:
@@ -17,8 +18,8 @@ def load_configs_from_yaml(yaml_file: str) -> Dict:
     Returns:
         yaml文件中的配置字典
     """
-    yaml_config = yaml.load(open(yaml_file, encoding="utf-8"), Loader=yaml.FullLoader)
-    configs_dict = {}
+    yaml_config = yaml.safe_load(open(yaml_file, encoding="utf-8"))
+    configs_dict: Dict[str, typing.Any] = {}
     for sub_k, sub_v in yaml_config.items():
         # 读取嵌套的参数
         if isinstance(sub_v, dict):
@@ -89,10 +90,10 @@ def parse_args() -> SimpleNamespace:
         "-b", "--batch_size", default=5, type=int, help="dev或者infer时刻的batch大小"
     )
     # -----------------------再处理dev和infer各自的参数（如果有）--------------------------------------------
-    parser_dev = subparsers.add_parser(
+    parser_dev = subparsers.add_parser(  # noqa
         "dev", help="验证模式", parents=[dev_infer_parent_parser]
     )
-    parser_infer = subparsers.add_parser(
+    parser_infer = subparsers.add_parser(  # noqa
         "infer", help="推理模式", parents=[dev_infer_parent_parser]
     )
     # --------------------------------------------------------------------------------------------------
@@ -125,12 +126,12 @@ def parse_args() -> SimpleNamespace:
         yaml_configs[c] = v
 
     # 转化为object格式
-    configs = SimpleNamespace(**yaml_configs)
+    configs_object = SimpleNamespace(**yaml_configs)
 
     # if configs.skip_too_long_input:
     #     print(f'skip_too_long_input is True, max_seq_len is {configs.max_seq_len}')
 
-    return configs
+    return configs_object
 
 
 if __name__ == "__main__":

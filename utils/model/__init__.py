@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# flake8: noqa
 """
 -------------------------------------------------
    File Name：     __init__.py
@@ -10,5 +10,8 @@
                    2019/7/28:
 -------------------------------------------------
 """
-from .sort import unsort, sort, tensor_unsort
-from .decoder import sdp_decoder, parse_semgraph
+from .decoder import parse_semgraph
+from .decoder import sdp_decoder
+from .sort import sort
+from .sort import tensor_unsort
+from .sort import unsort

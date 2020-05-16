@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Created by li huayong on 2019/11/3
 import torch.nn as nn
 from fairseq.modules import MultiheadAttention

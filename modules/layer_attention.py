@@ -1,7 +1,6 @@
 """
 The dot-product "Layer Attention" that is applied to the layers of BERT, along with layer dropout to reduce overfitting
 """
-
 from typing import List
 
 import torch
@@ -74,7 +73,7 @@ class LayerAttention(torch.nn.Module):
     def forward(
         self,
         tensors: List[torch.Tensor],  # pylint: disable=arguments-differ
-        mask: torch.Tensor = None,
+        mask: torch.Tensor,
     ) -> torch.Tensor:
         """
         Compute a weighted average of the ``tensors``.  The input tensors an be any shape
@@ -87,7 +86,6 @@ class LayerAttention(torch.nn.Module):
 
         When ``do_layer_norm=False`` the ``mask`` is ignored.
         """
-        assert isinstance(tensors, list) or isinstance(tensors, tuple), type(tensors)
         if len(tensors) != self.mixture_size:
             raise ValueError(
                 "{} tensors were passed, but the module was initialized to "

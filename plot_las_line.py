@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Created by li huayong on 2020/4/21
 import matplotlib.pyplot as plt
 import mplcyberpunk

@@ -40,4 +40,4 @@
 - [ ] 重构CharRNN的输入
 - [ ] 重构HLSTM的encoder
 - [ ] 支持句法依存分析
-- [ ] inverse square root learning rate decay (Vaswani et al., 2017). 
+- [ ] inverse square root learning rate decay (Vaswani et al., 2017).

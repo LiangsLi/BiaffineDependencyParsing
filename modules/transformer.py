@@ -4,18 +4,17 @@
 # This source code is licensed under the license found in the LICENSE file in
 # the root directory of this source tree. An additional grant of patent rights
 # can be found in the PATENTS file in the same directory.
+from typing import Optional
+from typing import Tuple
 
-from typing import Optional, Tuple
-
+import numpy
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from fairseq.modules import (
-    LayerNorm,
-    MultiheadAttention,
-    PositionalEmbedding,
-    TransformerSentenceEncoderLayer,
-)
+from fairseq.modules import LayerNorm
+from fairseq.modules import MultiheadAttention
+from fairseq.modules import PositionalEmbedding
+from fairseq.modules import TransformerSentenceEncoderLayer
 
 
 def init_bert_params(module):
@@ -66,7 +65,7 @@ class TransformerSentenceEncoder(nn.Module):
               in format B x C.
     """
 
-    def __init__(
+    def __init__(  # noqa: C901
         self,
         padding_idx: int,
         vocab_size: int,
@@ -94,7 +93,7 @@ class TransformerSentenceEncoder(nn.Module):
         use_residual: bool = True,
         use_norm: bool = True,
         use_pretrain: bool = False,
-        pretrain_vectors=None,
+        pretrain_vectors: Optional[numpy.ndarray] = None,
         pretrain_dim: int = 200,
     ) -> None:
 
@@ -111,7 +110,8 @@ class TransformerSentenceEncoder(nn.Module):
         self.use_pretrain = use_pretrain
         self.pretrain_dim = pretrain_dim
 
-        assert self.embedding_dim % num_attention_heads == 0
+        if not self.embedding_dim % num_attention_heads == 0:
+            raise RuntimeError("embedding_dim not match num_attention_heads")
 
         # word embedding:
         if self.use_pretrain:
@@ -200,7 +200,7 @@ class TransformerSentenceEncoder(nn.Module):
         # for layer in range(n_trans_layers_to_freeze):
         #     freeze_module_params(self.layers[layer])
 
-    def forward(
+    def forward(  # noqa: C901
         self,
         tokens: torch.Tensor,
         # segment_labels: torch.Tensor = None,

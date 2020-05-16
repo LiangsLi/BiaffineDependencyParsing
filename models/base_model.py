@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
 # Created by li huayong on 2019/11/10
 import os
 import pathlib
+import typing
 
 import torch
 import torch.nn as nn
@@ -16,9 +16,8 @@ class BaseModel(nn.Module):
     def save_pretrained(self, save_directory, weight_file_name="pytorch_model.bin"):
         """ Save a model and its configuration file to a directory, so that it
         """
-        assert os.path.isdir(
-            save_directory
-        ), "Saving path should be a directory where the model and configuration can be saved"
+        if not os.path.isdir(save_directory):
+            raise RuntimeError("Saving path should be a directory")
 
         # Only save the model it-self if we are using distributed training
         model_to_save = self.module if hasattr(self, "module") else self
@@ -31,10 +30,10 @@ class BaseModel(nn.Module):
         # If we save using the predefined names, we can load using `from_pretrained`
         output_model_file = os.path.join(save_directory, weight_file_name)
         torch.save(model_to_save.state_dict(), output_model_file)
-        print("Model weights saved in {}".format(output_model_file))
+        print(f"Model weights saved in {output_model_file}")
 
-    @classmethod
-    def from_pretrained(
+    @classmethod  # noqa: C901
+    def from_pretrained(  # noqa: C901
         cls,
         args,
         saved_model_path=None,
@@ -81,9 +80,9 @@ class BaseModel(nn.Module):
                 rename_key = re.sub("^bert.", "encoder.bertology.", key)
                 rename_state_dict[rename_key] = state_dict[key]
             state_dict = rename_state_dict
-        missing_keys = []
-        unexpected_keys = []
-        error_msgs = []
+        missing_keys: typing.List[str] = []
+        unexpected_keys: typing.List[str] = []
+        error_msgs: typing.List[str] = []
         # copy state_dict so _load_from_state_dict can modify it
         metadata = getattr(state_dict, "_metadata", None)
         state_dict = state_dict.copy()

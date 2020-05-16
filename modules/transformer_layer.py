@@ -4,15 +4,15 @@
 # This source code is licensed under the license found in the LICENSE file in
 # the root directory of this source tree. An additional grant of patent rights
 # can be found in the PATENTS file in the same directory.
+from typing import Tuple
 
+import fairseq.utils as utils
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import fairseq.utils as utils
-from fairseq.modules import (
-    LayerNorm,
-    MultiheadAttention,
-)
+from fairseq.modules import LayerNorm
+from fairseq.modules import MultiheadAttention
+
 from utils.model.initialization import init_bert_params
 
 
@@ -71,7 +71,7 @@ class TransformerSentenceEncoderLayer(nn.Module):
         x: torch.Tensor,
         self_attn_mask: torch.Tensor = None,
         self_attn_padding_mask: torch.Tensor = None,
-    ):
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         LayerNorm is applied either before or after the self-attention/ffn
         modules similar to the original Transformer imlementation.

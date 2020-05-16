@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# mypy: ignore-errors
 # Created by li huayong on 2019/11/6
 import torch
 import torch.nn.functional as F

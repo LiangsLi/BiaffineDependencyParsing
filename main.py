@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 -------------------------------------------------
    File Name：     main.py
@@ -12,18 +11,21 @@
 """
 import copy
 import os
-import torch
 import pathlib
 import shutil
+import typing
 from datetime import datetime
+
+import torch
 import yaml
 
-from trainers.bertology_trainer import BERTologyBaseTrainer
 from models.biaffine_model import BiaffineDependencyModel
+from PyToolkit.PyToolkit import init_logger
+from PyToolkit.PyToolkit import Timer
+from PyToolkit.PyToolkit.seed import set_seed
+from trainers.bertology_trainer import BERTologyBaseTrainer
 from utils.arguments import parse_args
 from utils.data.bertology_loader import load_bertology_input
-from PyToolkit.PyToolkit import Timer, init_logger
-from PyToolkit.PyToolkit.seed import set_seed
 
 logger = init_logger("parser", only_console=True)
 
@@ -137,7 +139,7 @@ def save_config_to_yaml(_config):
         yaml.dump(config, f)
 
 
-def train(configs) -> None:
+def train(configs: typing.Any) -> None:
     """
     训练模式
 

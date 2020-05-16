@@ -1,21 +1,20 @@
+# mypy: ignore-errors
+# flake8: noqa
 """
 Utils and wrappers for scoring parsers.
 """
-
-'''
-def score(system_conllu_file, gold_conllu_file, verbose=True):
-    """ Wrapper for UD parser scorer. """
-    evaluation = ud_scores(gold_conllu_file, system_conllu_file)
-    el = evaluation['LAS']
-    p = el.precision
-    r = el.recall
-    f = el.f1
-    if verbose:
-        scores = [evaluation[k].f1 * 100 for k in ['LAS', 'MLAS', 'BLEX']]
-        print("LAS\tMLAS\tBLEX")
-        print("{:.2f}\t{:.2f}\t{:.2f}".format(*scores))
-    return p, r, f
-'''
+# def score(system_conllu_file, gold_conllu_file, verbose=True):
+#     """ Wrapper for UD parser scorer. """
+#     evaluation = ud_scores(gold_conllu_file, system_conllu_file)
+#     el = evaluation['LAS']
+#     p = el.precision
+#     r = el.recall
+#     f = el.f1
+#     if verbose:
+#         scores = [evaluation[k].f1 * 100 for k in ['LAS', 'MLAS', 'BLEX']]
+#         print("LAS\tMLAS\tBLEX")
+#         print("{:.2f}\t{:.2f}\t{:.2f}".format(*scores))
+#     return p, r, f
 
 INF = float("inf")
 
@@ -149,10 +148,10 @@ def score(system_conllu_file, gold_conllu_file):
     system_sem16_file = conllu_file_2_sem16_file(system_conllu_file)
     gold_sem16_file = conllu_file_2_sem16_file(gold_conllu_file)
     reference_dataset = (
-        open(gold_sem16_file, "r", encoding="utf-8").read().strip().split("\n\n")
+        open(gold_sem16_file, encoding="utf-8").read().strip().split("\n\n")
     )
     answer_dataset = (
-        open(system_sem16_file, "r", encoding="utf-8").read().strip().split("\n\n")
+        open(system_sem16_file, encoding="utf-8").read().strip().split("\n\n")
     )
 
     assert len(reference_dataset) == len(answer_dataset), "Number of instance unequal."
@@ -226,8 +225,8 @@ def old_score(system_conllu_file, gold_conllu_file):
         0,
         0,
     )
-    with open(system_conllu_file, "r", encoding="utf-8") as f_system, open(
-        gold_conllu_file, "r", encoding="utf-8"
+    with open(system_conllu_file, encoding="utf-8") as f_system, open(
+        gold_conllu_file, encoding="utf-8"
     ) as f_gold:
 
         sys_sents = []

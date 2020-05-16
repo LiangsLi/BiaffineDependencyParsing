@@ -1,7 +1,9 @@
-from torch.utils.data import Dataset, TensorDataset
-from torch.utils.data import IterableDataset
-import numpy as np
 from typing import List
+
+import numpy as np
+from torch.utils.data import Dataset
+from torch.utils.data import IterableDataset
+from torch.utils.data import TensorDataset
 
 
 class ConcatTensorRandomDataset(Dataset):

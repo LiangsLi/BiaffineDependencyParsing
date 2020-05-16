@@ -1,15 +1,19 @@
-# -*- coding: utf-8 -*-
 # Created by li huayong on 2019/10/7
+import typing
+from typing import Dict
 
 import torch.nn as nn
-from typing import Dict
-from utils.data.graph_vocab import GraphVocab
-from modules.bertology_encoder import BERTologyEncoder
-from modules.biaffine import DeepBiaffineScorer, DirectBiaffineScorer
+
 from models.base_model import BaseModel
+from modules.bertology_encoder import BERTologyEncoder
+from modules.biaffine import DeepBiaffineScorer
+from modules.biaffine import DirectBiaffineScorer
+from utils.data.graph_vocab import GraphVocab
 
 
 class BiaffineDependencyModel(BaseModel):
+    encoder: typing.Optional[nn.Module]
+
     def __init__(self, args):
         """
         BERT+Transformer+Biaffine Dependency Parser Model
@@ -74,6 +78,7 @@ class BiaffineDependencyModel(BaseModel):
         #     self.label_loss_ratio = args.label_loss_ratio
 
     def forward(self, inputs: Dict) -> Dict:
+        self.encoder = typing.cast(nn.Module, self.encoder)
         if not isinstance(inputs, dict):
             raise RuntimeError("Parser Model input must be Dict type")
         encoder_output = self.encoder(**inputs)

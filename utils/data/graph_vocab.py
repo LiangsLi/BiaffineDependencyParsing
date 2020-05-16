@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 # Created by li huayong on 2019/9/24
 
 
-class GraphVocab(object):
+class GraphVocab:
     def __init__(self, vocab_file):
         self.id2unit = ["<EMPTY>", "<UNK>"]
         with open(vocab_file, encoding="utf-8") as f:

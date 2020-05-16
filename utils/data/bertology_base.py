@@ -1,13 +1,14 @@
-# -*- coding: utf-8 -*-
+# mypy: ignore-errors
 # Created by li huayong on 2019/11/19
 from typing import List
 
 import numpy as np
+
 from utils.data.conll_file import load_conllu_file
 from utils.data.graph_vocab import GraphVocab
 
 
-class InputExample(object):
+class InputExample:
     """A single training/test example for simple sequence classification."""
 
     def __init__(
@@ -29,7 +30,7 @@ class InputExample(object):
         self.pos = pos
 
 
-class InputFeatures(object):
+class InputFeatures:
     """A single set of features of data."""
 
     def __init__(
@@ -62,7 +63,7 @@ class InputFeatures(object):
             self.pos_ids = pos_ids
 
 
-class CoNLLUProcessor(object):
+class CoNLLUProcessor:
     """
         依存分析BERT数据处理，输入文件必须是CoNLL-U格式
     """
@@ -127,18 +128,26 @@ class CoNLLUProcessor(object):
         else:
             sum_len = 2
         for w in clear_words_list:
-            s.append(sum_len) if sum_len < max_seq_length else s.append(
-                max_seq_length - 1
-            )
+            # s.append(sum_len) if sum_len < max_seq_length else s.append(
+            #     max_seq_length - 1
+            # )
+            if sum_len < max_seq_length:
+                s.append(sum_len)
+            else:
+                s.append(max_seq_length - 1)
             if w.lower() not in self.word_vocab:  # 如果单词不在词表中，说明会被分割，要分开计算
                 sum_len += len(w)
             else:
                 # 如果单词在词表中，可以视长度为1
                 # 注意[MASK],[unused1]等特殊字符都在BERT的vocab中
                 sum_len += 1
-            e.append(sum_len - 1) if sum_len - 1 < max_seq_length else e.append(
-                max_seq_length - 1
-            )
+            # e.append(sum_len - 1) if sum_len - 1 < max_seq_length else e.append(
+            #     max_seq_length - 1
+            # )
+            if sum_len - 1 < max_seq_length:
+                e.append(sum_len - 1)
+            else:
+                e.append(max_seq_length - 1)
         return s, e
 
     def create_bert_example(
@@ -181,6 +190,7 @@ class CoNLLUProcessor(object):
                     head, dep_rel = arc.split(":")
                     dep_rel_idx = self.graph_vocab.unit2id[dep_rel]
                     line_res.append([int(head), dep_rel_idx])
+                # assert isinstance(deps, list)
                 deps.append(line_res)
                 words.append(line.word)
                 pos.append(line.pos)

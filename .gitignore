@@ -5,6 +5,7 @@
 /cache
 tmp.txt
 exam.yaml
+medical_metrics.md
 ### Python template
 # Byte-compiled / optimized / DLL files
 __pycache__/

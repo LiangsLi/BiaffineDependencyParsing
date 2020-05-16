@@ -25,7 +25,7 @@ class PairwiseBilinear(nn.Module):
     def forward(self, input1, input2):
         input1_size = list(input1.size())
         input2_size = list(input2.size())
-        output_size = [input1_size[0], input1_size[1], input2_size[1], self.output_size]
+        # output_size = [input1_size[0], input1_size[1], input2_size[1], self.output_size]
 
         # ((N x L1) x D1) * (D1 x (D2 x O)) -> (N x L1) x (D2 x O)
         # [(batch_size*seq_len),(head_feat_size+1)] * [(head_feat_size+1),((dep_feat_size+1))*output_size]

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 -------------------------------------------------
    File Name：     make_target
@@ -11,8 +10,9 @@
 -------------------------------------------------
 """
 import torch
-from utils.data.deprecated_common import GraphVocab
+
 from utils.data.conll_file import load_conllu_file
+from utils.data.deprecated_common import GraphVocab
 
 
 def make_unlabeltarget(arcs, sentlens, use_cuda=False):

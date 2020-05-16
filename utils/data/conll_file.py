@@ -1,8 +1,11 @@
+# mypy: ignore-errors
+# flask8: noqa
 """
 A wrapper/loader for the official conll-u format files.
 """
-import os
 import io
+import os
+import typing
 from typing import List
 
 FIELD_NUM = 10
@@ -21,7 +24,7 @@ FIELD_TO_IDX = {
 }
 
 
-class CoNLLFile(object):
+class CoNLLFile:
     def __init__(self, filename=None, input_str=None, ignore_gapping=True):
         # If ignore_gapping is True, all words that are gap fillers
         # (identified with a period in the sentence index) will be ignored.
@@ -48,7 +51,9 @@ class CoNLLFile(object):
         Load data into a list of sentences, where each sentence is a list of lines,
         and each line is a list of conllu fields.
         """
-        sents, cache = [], []
+        sents = []
+        cache: List[str] = []
+        infile: typing.Union[typing.TextIO, io.StringIO]
         if self._from_str:
             infile = io.StringIO(self.file)
         else:
@@ -298,21 +303,21 @@ class CoNLLFile(object):
         return
 
 
-class CoNLLUWord(object):
+class CoNLLUWord:
     def __init__(self, word_data):
         self.word = word_data[0]
         self.pos = word_data[1]
         self.dep = word_data[2]
 
 
-class CoNLLUSent(object):
+class CoNLLUSent:
     def __init__(self, conllu_sent: List):
         self.words = []
         for word in conllu_sent:
             self.words.append(CoNLLUWord(word))
 
 
-class CoNLLUData(object):
+class CoNLLUData:
     def __init__(self, conllu_data: List):
         self.sentences = []
         for sent in conllu_data:

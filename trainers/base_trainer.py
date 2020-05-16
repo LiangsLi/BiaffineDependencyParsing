@@ -1,20 +1,24 @@
-# -*- coding: utf-8 -*-
 # Created by li huayong on 2019/9/28
 import os
+import typing
+from abc import ABCMeta
+from abc import abstractmethod
+from typing import Dict
+
 import torch
 import torch.nn as nn
 from torch.utils.data import TensorDataset
 from tqdm import tqdm
-from abc import ABCMeta, abstractmethod
-from typing import Dict
-from utils.data.conll_file import CoNLLFile
-from utils.data.graph_vocab import GraphVocab
-from utils.model.get_optimizer import get_optimizer
-from utils.model.decoder import sdp_decoder, parse_semgraph
+
 import utils.model.sdp_simple_scorer as sdp_scorer
-from utils.best_result import BestResult
 from PyToolkit.PyToolkit import get_logger
 from PyToolkit.PyToolkit.seed import set_seed
+from utils.best_result import BestResult
+from utils.data.conll_file import CoNLLFile
+from utils.data.graph_vocab import GraphVocab
+from utils.model.decoder import parse_semgraph
+from utils.model.decoder import sdp_decoder
+from utils.model.get_optimizer import get_optimizer
 
 try:
     from torch.utils.tensorboard import SummaryWriter
@@ -49,7 +53,7 @@ class BaseDependencyTrainer(metaclass=ABCMeta):
         """
         raise NotImplementedError("must implement in sub class")
 
-    def _custom_train_operations(self, epoch: int):
+    def _custom_train_operations(self, epoch: int) -> None:
         """
             某些模型在训练时可能需要一些定制化的操作，
             比如BERT类型的模型可能会在Training的时候动态freeze某些层
@@ -97,8 +101,10 @@ class BaseDependencyTrainer(metaclass=ABCMeta):
         # torch.eq(word_pad_mask, False) 得到word_mask
         words_num = torch.sum(torch.eq(word_pad_mask, False)).item()
         if calc_loss:
-            assert label_loss_ratio
-            assert unlabeled_target is not None and labeled_target is not None
+            if label_loss_ratio is None:
+                raise RuntimeError("label_loss_ratio can not be None")
+            if unlabeled_target is None or labeled_target is None:
+                raise RuntimeError("unlabeled_target/labeled_target can not be None")
             dep_arc_loss_func = nn.BCEWithLogitsLoss(weight=weights, reduction="sum")
             dep_arc_loss = dep_arc_loss_func(unlabeled_scores, unlabeled_target)
 
@@ -113,8 +119,8 @@ class BaseDependencyTrainer(metaclass=ABCMeta):
             )
 
             if self.configs.use_pos:
-                assert pos_logits is not None
-                assert pos_target is not None
+                if pos_logits is None or pos_target is None:
+                    raise RuntimeError("pos_logits/pos_target can not be None")
                 pos_loss_func = nn.CrossEntropyLoss(
                     ignore_index=self.configs.pos_label_pad_idx
                 )
@@ -174,6 +180,7 @@ class BaseDependencyTrainer(metaclass=ABCMeta):
                     torch.nn.utils.clip_grad_norm_(
                         self.model.parameters(), self.configs.max_grad_norm
                     )
+                self.optimizer = typing.cast(torch.optim.Optimizer, self.optimizer)
                 self.optimizer.step()
                 if self.optim_scheduler:
                     self.optim_scheduler.step()  # Update learning rate schedule
@@ -181,7 +188,8 @@ class BaseDependencyTrainer(metaclass=ABCMeta):
         else:
             loss = None
         if calc_prediction:
-            assert sentence_lengths
+            if not sentence_lengths:
+                raise RuntimeError()
             weights = weights.unsqueeze(3)
             head_probs = torch.sigmoid(unlabeled_scores).unsqueeze(3)
             label_probs = torch.softmax(labeled_scores, dim=3)
@@ -348,7 +356,7 @@ class BaseDependencyTrainer(metaclass=ABCMeta):
             #         'dep_ids': dep_ids,
             #         'pos_ids': pos_ids,
             #     }
-            inputs, word_mask, sent_lens, dep_ids = (
+            inputs, word_mask, sent_lens, dep_ids = (  # noqa: F841
                 unpacked_batch["inputs"],
                 unpacked_batch["word_mask"],
                 unpacked_batch["sent_len"],

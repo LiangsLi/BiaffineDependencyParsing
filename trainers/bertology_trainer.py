@@ -1,7 +1,8 @@
-# -*- coding: utf-8 -*-
 # Created by li huayong on 2020/1/6
 import re
+
 import torch
+
 from trainers.base_trainer import BaseDependencyTrainer
 
 
@@ -9,10 +10,11 @@ class BERTologyBaseTrainer(BaseDependencyTrainer):
     def __init__(self, config, *args, **kwargs):
         super().__init__(config, *args, **kwargs)
         if config.freeze:
-            assert config.freeze_bertology_layers >= -1 and config.freeze_epochs in [
-                "all",
-                "first",
-            ]
+            if not (
+                config.freeze_bertology_layers >= -1
+                and config.freeze_epochs in ["all", "first"]
+            ):
+                raise RuntimeError("bad freeze config")
         self._freeze = config.freeze
         self._freeze_layers = config.freeze_bertology_layers
         self._freeze_epochs = config.freeze_epochs
@@ -72,7 +74,7 @@ class BERTologyBaseTrainer(BaseDependencyTrainer):
                     # 如果self._freeze_layers > -1；则说明除了freeze embedding层之外，还要freeze别的层
                     if self._freeze_layers > -1:
                         if re.match(
-                            f"^.+encoder\.bertology\.encoder\.layer\.[0-{self._freeze_layers}]\..+",
+                            fr"^.+encoder\.bertology\.encoder\.layer\.[0-{self._freeze_layers}]\..+",
                             name,
                         ):
                             para.requires_grad = False

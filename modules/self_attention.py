@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 -------------------------------------------------
    File Name：     self_attention
@@ -10,9 +9,9 @@
                    2019/5/11:
 -------------------------------------------------
 """
+import numpy as np
 import torch
 import torch.nn as nn
-import numpy as np
 
 __author__ = "Yu-Hsiang Huang"
 

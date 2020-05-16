@@ -1,25 +1,30 @@
-# -*- coding: utf-8 -*-
+# mypy: ignore-errors
+# flake8: noqa
 # Created by li huayong on 2019/9/24
 import json
 import os
 import pathlib
 import pickle
 from collections import Counter
-from multiprocessing import Pool
 from functools import partial
+from multiprocessing import Pool
+
 import torch
-from pytorch_transformers import (
-    BertTokenizer,
-    RobertaTokenizer,
-    XLMTokenizer,
-    XLNetTokenizer,
-)
-from utils.data.bertology_base import *
-from torch.utils.data import DataLoader, RandomSampler, SequentialSampler, TensorDataset
+from pytorch_transformers import BertTokenizer
+from pytorch_transformers import RobertaTokenizer
+from pytorch_transformers import XLMTokenizer
+from pytorch_transformers import XLNetTokenizer
+from torch.utils.data import DataLoader
+from torch.utils.data import RandomSampler
+from torch.utils.data import SequentialSampler
+from torch.utils.data import TensorDataset
 from torch.utils.data.distributed import DistributedSampler
+
+from PyToolkit.PyToolkit import get_logger
+from PyToolkit.PyToolkit import Timer
+from utils.data.bertology_base import *
 from utils.data.conll_file import CoNLLUData
 from utils.data.custom_dataset import ConcatTensorRandomDataset
-from PyToolkit.PyToolkit import get_logger, Timer
 
 BERTology_TOKENIZER = {
     "bert": BertTokenizer,
@@ -151,6 +156,7 @@ def convert_examples_to_features(
             end_pos = end_pos + ([max_seq_length - 1] * position_padding_length)
             assert start_pos[-1] == max_seq_length - 1
             assert end_pos[-1] == max_seq_length - 1
+        assert isinstance(example.pos, list)
         # 开始位置是ROOT，对应的pos设置为PAD (不计算loss)
         example.pos = ["<PAD>"] + example.pos
         # 如果长度超过max_seq_length，则需要截断
@@ -362,7 +368,7 @@ def one_example_to_feature(
     return feature
 
 
-class POSTokenizer(object):
+class POSTokenizer:
     def __init__(self, pos_list: List):
         self.pos_list = ["<PAD>", "<UNK>"] + pos_list
 
@@ -402,7 +408,7 @@ def get_pos_tokenizer(new_pos_list, file_path, merge_train=False, conllu_data=No
             json.dump(pos_list, f, ensure_ascii=False)
         print(">>> get new pos tokenizer")
     elif (file_path / "pos_list.json").exists():
-        with open(str(file_path / "pos_list.json"), "r", encoding="utf-8") as f:
+        with open(str(file_path / "pos_list.json"), encoding="utf-8") as f:
             pos_list = json.load(f)
         print(">>> load pos tokenizer")
     else:
